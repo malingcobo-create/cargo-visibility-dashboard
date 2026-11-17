@@ -6,7 +6,7 @@ A simulated vehicle-logistics dashboard for a multi-port South African operation
 
 All data is generated. This is a demo, not a real company's system.
 
-![Dashboard](dashboard.png)
+![Dashboard](Dashboard.png.png)
 
 ## What it does
 
