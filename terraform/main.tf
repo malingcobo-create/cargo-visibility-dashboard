@@ -60,3 +60,35 @@ resource "azurerm_mysql_flexible_server_firewall_rule" "azure_services" {
   start_ip_address    = "0.0.0.0"
   end_ip_address      = "0.0.0.0"
 }
+resource "azurerm_service_plan" "main" {
+  name                = "plan-cargo-demo"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  os_type             = "Linux"
+  sku_name            = "B1"
+}
+
+resource "azurerm_linux_web_app" "main" {
+  name                = "app-cargo-malil"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  service_plan_id     = azurerm_service_plan.main.id
+
+  site_config {
+    app_command_line = "gunicorn --bind=0.0.0.0 --timeout 600 app:app"
+    application_stack {
+      python_version = "3.12"
+    }
+  }
+
+  app_settings = {
+    DB_HOST                        = azurerm_mysql_flexible_server.main.fqdn
+    DB_USER                        = "cargoadmin"
+    CARGO_DB_PASSWORD              = var.db_password
+    SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
+  }
+}
+
+output "app_url" {
+  value = "https://${azurerm_linux_web_app.main.default_hostname}"
+}
