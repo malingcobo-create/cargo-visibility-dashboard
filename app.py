@@ -75,7 +75,7 @@ def home():
     damaged = cur.fetchall()
     conn.close()
 
-    html = STYLE + "<h1>Cars at each place</h1><div class='grid'>"
+    html = STYLE + "<h1>Cars at each terminal</h1><div class='grid'>"
     for terminal, count in rows:
         html += f"<div class='card'><div class='place'>{terminal}</div><div class='count'>{count}</div></div>"
     html += "</div>"
