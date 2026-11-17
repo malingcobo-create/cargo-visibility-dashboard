@@ -92,3 +92,39 @@ resource "azurerm_linux_web_app" "main" {
 output "app_url" {
   value = "https://${azurerm_linux_web_app.main.default_hostname}"
 }
+variable "alert_email" {
+  type = string
+}
+
+resource "azurerm_monitor_action_group" "email" {
+  name                = "ag-cargo-email"
+  resource_group_name = azurerm_resource_group.main.name
+  short_name          = "cargoalert"
+
+  email_receiver {
+    name          = "owner"
+    email_address = var.alert_email
+  }
+}
+
+resource "azurerm_monitor_metric_alert" "errors" {
+  name                = "alert-cargo-5xx"
+  resource_group_name = azurerm_resource_group.main.name
+  scopes              = [azurerm_linux_web_app.main.id]
+  description         = "Dashboard returned server errors"
+  severity            = 2
+  frequency           = "PT1M"
+  window_size         = "PT5M"
+
+  criteria {
+    metric_namespace = "Microsoft.Web/sites"
+    metric_name      = "Http5xx"
+    aggregation      = "Total"
+    operator         = "GreaterThan"
+    threshold        = 2
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.email.id
+  }
+}
